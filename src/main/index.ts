@@ -25,6 +25,7 @@ interface TokenResponse {
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
+    title: 'Somtoday Inloggen',
     width: 1000,
     height: 800,
     show: false,
@@ -64,6 +65,7 @@ function setupIpcHandlers(mainWindow: BrowserWindow): void {
     try {
       // Maak een nieuwe browser window met een aparte sessie
       const authWindow = new BrowserWindow({
+        title: 'Inloggen bij Somtoday',
         width: 800,
         height: 800,
         show: true,
