@@ -62,6 +62,7 @@ function setupIpcHandlers(mainWindow: BrowserWindow): void {
   ipcMain.handle('login', async (_, schoolUuid: string, oidcUrl: string) => {
     console.log('Received login request for school:', schoolUuid, 'with OIDC URL:', oidcUrl)
     try {
+      // Maak een nieuwe browser window met een aparte sessie
       const authWindow = new BrowserWindow({
         width: 800,
         height: 800,
@@ -71,9 +72,40 @@ function setupIpcHandlers(mainWindow: BrowserWindow): void {
         autoHideMenuBar: true,
         webPreferences: {
           nodeIntegration: false,
-          contextIsolation: true
+          contextIsolation: true,
+          // Gebruik een nieuwe partitie voor elke sessie om eerdere login-informatie te vermijden
+          partition: `login-${Date.now()}`
         }
       })
+
+      // Wis alle cookies en sessiegegevens
+      const ses = authWindow.webContents.session
+
+      try {
+        // Wacht tot de cookies zijn gewist
+        await ses.clearStorageData({
+          storages: [
+            'cookies',
+            'localstorage',
+            'cachestorage',
+            'indexdb',
+            'websql',
+            'serviceworkers'
+          ]
+        })
+        console.log('Session data cleared successfully')
+
+        // Wacht tot de cache is gewist
+        await ses.clearCache()
+        console.log('Browser cache cleared successfully')
+
+        // Wacht tot de auth data is gewist
+        await ses.clearAuthCache()
+        console.log('Auth cache cleared successfully')
+      } catch (clearError) {
+        console.error('Error clearing session data:', clearError)
+        // Ga door ondanks fouten bij het wissen van de cache
+      }
 
       // Build OAuth URL with the school's information
       const baseUrl = 'https://somtoday.nl/oauth2/authorize'
@@ -98,7 +130,6 @@ function setupIpcHandlers(mainWindow: BrowserWindow): void {
 
       // Setup navigation event handlers to catch the OAuth redirect
       const handleNavigation = (navUrl: string): boolean => {
-        // console.log('Navigation detected to:', navUrl)
         if (navUrl.startsWith(REDIRECT_URI) || navUrl.includes('/oauth/callback')) {
           handleAuthCallback(navUrl, authWindow, mainWindow)
           return true
@@ -149,7 +180,10 @@ function setupIpcHandlers(mainWindow: BrowserWindow): void {
       })
 
       // Load the auth URL
-      await authWindow.loadURL(authUrl)
+      await authWindow.loadURL(authUrl, {
+        // Extra headers om caching te voorkomen
+        extraHeaders: 'pragma: no-cache\n'
+      })
 
       return { success: true }
     } catch (error) {
