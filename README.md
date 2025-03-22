@@ -1,38 +1,31 @@
-<<<<<<< HEAD
-# SomtodayLogin
-=======
-# somtodaylogin
+# Somtoday Inloggen
 
-A minimal Electron application with TypeScript
+Een desktop applicatie gebouwd met Electron om Somtoday API-tokens te genereren.
 
-## Recommended IDE Setup
+## Beschrijving
 
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+Somtoday Inloggen is een desktop applicatie waarmee je eenvoudig toegangstokens kunt genereren voor de Somtoday API. Deze tokens kunnen worden gebruikt in je eigen applicaties of scripts om te communiceren met de Somtoday API.
 
-## Project Setup
-
-### Install
+### Project setup
 
 ```bash
+# Installeren van dependencies
 $ npm install
-```
 
-### Development
-
-```bash
+# Starten in ontwikkelingsmodus
 $ npm run dev
-```
 
-### Build
-
-```bash
-# For windows
+# Bouwen voor productie
+# Voor Windows
 $ npm run build:win
 
-# For macOS
+# Voor macOS
 $ npm run build:mac
 
-# For Linux
+# Voor Linux
 $ npm run build:linux
 ```
->>>>>>> 5181a48 (initialize project)
+
+## Disclaimer
+
+Deze applicatie is niet officieel gelieerd aan Somtoday of Topicus. Het is een onafhankelijk hulpmiddel voor ontwikkelaars die gebruik willen maken van de Somtoday API. Gebruik deze applicatie op eigen risico en verantwoordelijkheid.
