@@ -1,0 +1,164 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Somtoday Inloggen</title>
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; img-src 'self' data:; connect-src 'self' https://raw.githubusercontent.com;"
+    />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <link href="./assets/main.css" type="text/css" rel="stylesheet" />
+  </head>
+
+  <body class="bg-gray-100">
+    <div id="app" class="min-h-screen flex flex-col items-center justify-center p-4">
+      <!-- School selection container -->
+      <div id="school-selection-container" class="w-full max-w-md">
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-bold text-blue-600">Somtoday Inloggen</h1>
+          <p class="text-gray-600 mt-2">Selecteer je school om een token te genereren</p>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+          <div class="p-5">
+            <div class="mb-4">
+              <label for="school-search" class="block text-sm font-medium text-gray-700 mb-1">Zoek je school</label>
+              <input 
+                id="school-search" 
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                type="text" 
+                placeholder="Voer schoolnaam of plaats in..."
+              />
+            </div>
+            
+            <div id="loading-container" class="py-8 flex flex-col items-center">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              <p class="mt-2 text-gray-500">Scholen laden...</p>
+            </div>
+            
+            <div id="error-container" class="hidden py-4 px-3 bg-red-50 text-red-700 rounded-md">
+              <p>Kon scholen niet laden. Probeer het later opnieuw.</p>
+              <button id="retry-button" class="mt-2 px-4 py-1 bg-red-100 hover:bg-red-200 rounded-md text-sm font-medium transition-colors">
+                Opnieuw proberen
+              </button>
+            </div>
+            
+            <div id="schools-container" class="hidden">
+              <div class="border border-gray-200 rounded-md max-h-96 overflow-y-auto">
+                <ul id="schools-list" class="divide-y divide-gray-200"></ul>
+              </div>
+              <p id="no-results" class="hidden py-3 text-center text-gray-500">Geen scholen gevonden die aan je zoekopdracht voldoen</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Authenticatie laadscherm (nieuw) -->
+      <div id="auth-loading-container" class="hidden w-full max-w-md">
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-bold text-blue-600">Authenticatie</h1>
+          <p class="text-gray-600 mt-2">Er is een inlogvenster geopend</p>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+          <div class="p-8 flex flex-col items-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+            <p class="text-lg text-gray-700 mb-2">Log in bij je school</p>
+            <p class="text-sm text-gray-500 text-center">Er is een nieuw venster geopend waarin je je schoolaccount kunt gebruiken om een token te genereren.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Token display container (hidden by default) -->
+      <div id="token-container" class="hidden w-full max-w-2xl">
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-bold text-blue-600">Somtoday Tokens</h1>
+          <p class="text-gray-600 mt-2">Tokens gegenereerd voor <span id="school-name" class="font-medium"></span></p>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-6">
+          <div class="border-b border-gray-200">
+            <div class="flex justify-between items-center">
+              <div class="flex">
+                <button id="access-token-tab" class="px-4 py-3 text-blue-600 border-b-2 border-blue-500 font-medium">Access Token</button>
+                <button id="refresh-token-tab" class="px-4 py-3 text-gray-600 hover:text-gray-900">Refresh Token</button>
+              </div>
+              <div class="mr-4">
+                <button id="new-token-button" class="px-4 py-2 bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200 transition-colors flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Nieuw token
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="p-5">
+            <div id="access-token-panel">
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Access Token</label>
+                <div class="relative">
+                  <textarea 
+                    id="access-token-text" 
+                    class="w-full h-40 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                    readonly
+                  ></textarea>
+                  <button id="copy-access-token" class="absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white rounded p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="mb-4">
+                <div class="flex justify-between items-center mb-1">
+                  <label class="block text-sm font-medium text-gray-700">QR Code</label>
+                  <span class="text-xs text-amber-600">Mogelijk niet scanbaar voor lange tokens</span>
+                </div>
+                <div class="flex justify-center bg-white p-4 border border-gray-300 rounded-md">
+                  <canvas id="access-token-qr" class="max-w-full"></canvas>
+                </div>
+              </div>
+            </div>
+            
+            <div id="refresh-token-panel" class="hidden">
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Refresh Token</label>
+                <div class="relative">
+                  <textarea 
+                    id="refresh-token-text" 
+                    class="w-full h-40 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                    readonly
+                  ></textarea>
+                  <button id="copy-refresh-token" class="absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white rounded p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="mb-4">
+                <div class="flex justify-between items-center mb-1">
+                  <label class="block text-sm font-medium text-gray-700">QR Code</label>
+                  <span class="text-xs text-amber-600">Mogelijk niet scanbaar voor lange tokens</span>
+                </div>
+                <div class="flex justify-center bg-white p-4 border border-gray-300 rounded-md">
+                  <canvas id="refresh-token-qr" class="max-w-full"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./src/renderer.ts"></script>
+  </body>
+</html>
