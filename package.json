@@ -1,7 +1,7 @@
 {
   "name": "somtodaylogin",
   "version": "1.0.0",
-  "description": "A minimal Electron application with TypeScript",
+  "description": "Een desktop applicatie gebouwd met Electron om Somtoday API-tokens te genereren.",
   "main": "./out/main/index.js",
   "author": "example.com",
   "homepage": "https://electron-vite.org",
