@@ -29,4 +29,3 @@ jobs:
         with:
           github_token: ${{ secrets.RELEASE_PAT }}
           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
-          package_root: frontend
