@@ -1,5 +1,5 @@
-appId: com.electron.app
-productName: somtodaylogin
+appId: nl.dvddisk7.somtodaylogin
+productName: Somtoday Login
 directories:
   buildResources: build
 files:
@@ -39,7 +39,8 @@ appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
 publish:
-  provider: generic
-  url: https://example.com/auto-updates
+  provider: github
+  owner: DVDdisk7
+  repo: somtodaylogin
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/
