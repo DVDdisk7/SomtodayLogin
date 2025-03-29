@@ -28,4 +28,4 @@ $ npm run build:linux
 
 ## Disclaimer
 
-Deze applicatie is niet officieel gelieerd aan Somtoday of Topicus. Het is een onafhankelijk hulpmiddel voor ontwikkelaars die gebruik willen maken van de Somtoday API. Gebruik deze applicatie op eigen risico en verantwoordelijkheid.
+Deze applicatie is niet officieel gelieerd aan Somtoday of Topicus
